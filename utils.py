@@ -6,8 +6,8 @@ import sqlite3
 def format_currency(value):
     """Format a value as currency"""
     if pd.isna(value):
-        return "₹0.00"
-    return f"₹{value:,.2f}"
+        return "Rs. 0.00"
+    return f"Rs. {value:,.2f}"
 
 def format_quantity(value, unit=""):
     """Format a quantity value with optional unit"""

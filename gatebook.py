@@ -56,11 +56,11 @@ def show_gatebook_entry():
         with col1:
             quantity = st.number_input("Quantity", min_value=0.01, step=0.01)
         with col2:
-            rate = st.number_input("Rate (₹)", min_value=0.01, step=0.01)
+            rate = st.number_input("Rate (Rs.)", min_value=0.01, step=0.01)
         
         # Show calculated amount
         amount = quantity * rate
-        st.info(f"Total Amount: ₹{amount:.2f}")
+        st.info(f"Total Amount: Rs. {amount:.2f}")
         
         # Transaction type
         transaction_type = st.radio(
@@ -123,8 +123,8 @@ def show_gatebook_entry():
                 "Party": party_name,
                 "Item": item_name,
                 "Quantity": f"{quantity}",
-                "Rate": f"₹{rate:.2f}",
-                "Amount": f"₹{amount:.2f}",
+                "Rate": f"Rs. {rate:.2f}",
+                "Amount": f"Rs. {amount:.2f}",
                 "Type": "Incoming (Purchase)" if transaction_type == "incoming" else "Outgoing (Sale)",
                 "Description": description or "N/A"
             }
@@ -141,7 +141,7 @@ def show_gatebook_entry():
     if not recent_transactions.empty:
         # Format the dataframe for display
         display_df = recent_transactions.copy()
-        display_df["amount"] = display_df["amount"].apply(lambda x: f"₹{x:.2f}")
+        display_df["amount"] = display_df["amount"].apply(lambda x: f"Rs. {x:.2f}")
         display_df["transaction_type"] = display_df["transaction_type"].apply(
             lambda x: "⬆️ " + x.capitalize() if x == "incoming" else "⬇️ " + x.capitalize()
         )

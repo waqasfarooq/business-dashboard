@@ -8,66 +8,26 @@ def format_currency(value):
     """Format a value as currency"""
     return f"₹{value:,.2f}"
 
-def create_ag_grid(df, height=400):
-    """Create an AgGrid component with the given dataframe"""
-    gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_default_column(
-        resizable=True,
-        filterable=True,
-        sortable=True,
-        min_column_width=80
-    )
-    
-    # Configure specific columns
+def display_dataframe(df, height=400):
+    """Display a dataframe with formatting using Streamlit's native components"""
+    # Format currency columns if present
     if 'amount' in df.columns:
-        gb.configure_column(
-            "amount",
-            type=["numericColumn", "numberColumnFilter"],
-            valueFormatter="data.amount ? '₹' + Number(data.amount).toLocaleString('en-IN', {minimumFractionDigits: 2}) : ''",
-            width=120
-        )
-    
+        df['amount'] = df['amount'].apply(lambda x: format_currency(x) if x else '')
+        
     if 'debit' in df.columns:
-        gb.configure_column(
-            "debit",
-            type=["numericColumn", "numberColumnFilter"],
-            valueFormatter="data.debit ? '₹' + Number(data.debit).toLocaleString('en-IN', {minimumFractionDigits: 2}) : ''",
-            width=120
-        )
-    
+        df['debit'] = df['debit'].apply(lambda x: format_currency(x) if x else '')
+        
     if 'credit' in df.columns:
-        gb.configure_column(
-            "credit",
-            type=["numericColumn", "numberColumnFilter"],
-            valueFormatter="data.credit ? '₹' + Number(data.credit).toLocaleString('en-IN', {minimumFractionDigits: 2}) : ''",
-            width=120
-        )
-    
+        df['credit'] = df['credit'].apply(lambda x: format_currency(x) if x else '')
+        
     if 'balance' in df.columns:
-        gb.configure_column(
-            "balance",
-            type=["numericColumn", "numberColumnFilter"],
-            valueFormatter="data.balance ? '₹' + Number(data.balance).toLocaleString('en-IN', {minimumFractionDigits: 2}) : ''",
-            width=120
-        )
+        df['balance'] = df['balance'].apply(lambda x: format_currency(x) if x else '')
     
-    # Enable pagination for better performance with large datasets
-    gb.configure_pagination(
-        paginationAutoPageSize=False,
-        paginationPageSize=15
-    )
-    
-    grid_options = gb.build()
-    
-    # Display the grid
-    return AgGrid(
+    # Use Streamlit's dataframe with column configuration
+    return st.dataframe(
         df,
-        gridOptions=grid_options,
-        height=height,
-        theme="streamlit",
-        allow_unsafe_jscode=True,
-        update_mode="model",
-        fit_columns_on_grid_load=False
+        use_container_width=True,
+        height=height
     )
 
 def date_filter_ui():
@@ -127,15 +87,15 @@ def show_general_ledger():
     with col3:
         st.metric("Net Amount", format_currency(total_incoming - total_outgoing))
     
-    # Prepare data for ag-grid
+    # Prepare data for display
     display_df = transactions.copy()
     
     # Rename columns for better display
     display_df.columns = ["ID", "Date", "Party", "Item", "Quantity", "Unit", "Rate", "Amount", "Description", "Type"]
     
-    # Display the ag-grid
+    # Display the dataframe
     st.subheader("Transaction Details")
-    grid_response = create_ag_grid(display_df, height=500)
+    display_dataframe(display_df, height=500)
 
 def show_party_ledger():
     """Display the ledger for a specific party"""
@@ -190,19 +150,19 @@ def show_party_ledger():
     with col3:
         st.metric("Current Balance", format_currency(balance))
     
-    # Prepare data for ag-grid
+    # Prepare data for display
     display_df = ledger_data.copy()
     
     # Rename columns for better display
     display_df.columns = ["ID", "Date", "Item", "Quantity", "Unit", "Rate", "Amount", 
-                          "Debit", "Credit", "Description", "Type", "Balance"]
+                        "Debit", "Credit", "Description", "Type", "Balance"]
     
     # Display columns
     display_cols = ["Date", "Item", "Quantity", "Rate", "Debit", "Credit", "Balance", "Description"]
     
-    # Display the ag-grid
+    # Display the dataframe
     st.subheader("Transaction Details")
-    grid_response = create_ag_grid(display_df[display_cols], height=500)
+    display_dataframe(display_df[display_cols], height=500)
 
 def show_item_ledger():
     """Display the ledger for a specific item"""
@@ -257,16 +217,16 @@ def show_item_ledger():
     with col3:
         st.metric("Current Stock", f"{current_stock:,.2f}")
     
-    # Prepare data for ag-grid
+    # Prepare data for display
     display_df = ledger_data.copy()
     
     # Rename columns for better display
     display_df.columns = ["ID", "Date", "Party", "Quantity", "Rate", "Amount", "Type",
-                          "Quantity In", "Quantity Out", "Description", "Balance"]
+                        "Quantity In", "Quantity Out", "Description", "Balance"]
     
     # Display columns
     display_cols = ["Date", "Party", "Quantity", "Rate", "Amount", "Quantity In", "Quantity Out", "Balance", "Description"]
     
-    # Display the ag-grid
+    # Display the dataframe
     st.subheader("Transaction Details")
-    grid_response = create_ag_grid(display_df[display_cols], height=500)
+    display_dataframe(display_df[display_cols], height=500)

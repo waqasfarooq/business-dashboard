@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import database
-from st_aggrid import AgGrid, GridOptionsBuilder
 
 def show_party_management():
     """Display the party management page"""
@@ -52,33 +51,29 @@ def show_party_management():
         if parties.empty:
             st.info("No parties found. Add a party using the 'Add New Party' tab.")
         else:
-            # Create the aggrid
-            gb = GridOptionsBuilder.from_dataframe(parties)
-            gb.configure_default_column(resizable=True, filterable=True, sortable=True)
-            gb.configure_selection(selection_mode="single", use_checkbox=False)
-            gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
-            grid_options = gb.build()
-            
             # Rename columns for display
             display_df = parties.copy()
             display_df.columns = ["ID", "Name", "Contact Person", "Phone", "Email", "Address", "Created At"]
             
-            # Display the grid
-            grid_response = AgGrid(
-                display_df,
-                gridOptions=grid_options,
-                height=400,
-                theme="streamlit",
-                allow_unsafe_jscode=True,
-                update_mode="selection_changed"
-            )
+            # Display the dataframe
+            with st.container():
+                st.dataframe(
+                    display_df,
+                    use_container_width=True,
+                    height=400
+                )
+                
+                # Selection mechanism
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    party_id = st.number_input("Select Party ID to Edit", 
+                                          min_value=int(display_df["ID"].min()) if not display_df.empty else 1,
+                                          max_value=int(display_df["ID"].max()) if not display_df.empty else 100,
+                                          step=1)
             
-            # Check if a row is selected for editing
-            selected_row = grid_response["selected_rows"]
-            
-            if selected_row:
+            # Check if an ID is selected for editing
+            if party_id:
                 st.subheader("Edit Party")
-                party_id = selected_row[0]["ID"]
                 
                 # Get the selected party details
                 party_details = database.get_party_details(party_id)
@@ -105,3 +100,5 @@ def show_party_management():
                                 st.rerun()
                             else:
                                 st.error(message)
+                else:
+                    st.error(f"No party found with ID {party_id}")

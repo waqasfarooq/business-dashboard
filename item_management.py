@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import database
-from st_aggrid import AgGrid, GridOptionsBuilder
 
 def show_item_management():
     """Display the item management page"""
@@ -57,33 +56,33 @@ def show_item_management():
         if items.empty:
             st.info("No items found. Add an item using the 'Add New Item' tab.")
         else:
-            # Create the aggrid
-            gb = GridOptionsBuilder.from_dataframe(items)
-            gb.configure_default_column(resizable=True, filterable=True, sortable=True)
-            gb.configure_selection(selection_mode="single", use_checkbox=False)
-            gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
-            grid_options = gb.build()
-            
             # Rename columns for display
             display_df = items.copy()
             display_df.columns = ["ID", "Name", "Description", "Unit", "Created At", "Current Stock"]
             
-            # Display the grid
-            grid_response = AgGrid(
-                display_df,
-                gridOptions=grid_options,
-                height=400,
-                theme="streamlit",
-                allow_unsafe_jscode=True,
-                update_mode="selection_changed"
-            )
+            # Display the dataframe
+            selected_row_index = None
+            with st.container():
+                st.dataframe(
+                    display_df,
+                    use_container_width=True,
+                    height=400,
+                    column_config={
+                        "Current Stock": st.column_config.NumberColumn(format="%.2f")
+                    }
+                )
+                
+                # Selection mechanism
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    item_id = st.number_input("Select Item ID to Edit", 
+                                          min_value=int(display_df["ID"].min()) if not display_df.empty else 1,
+                                          max_value=int(display_df["ID"].max()) if not display_df.empty else 100,
+                                          step=1)
             
-            # Check if a row is selected for editing
-            selected_row = grid_response["selected_rows"]
-            
-            if selected_row:
+            # Check if an ID is selected for editing
+            if item_id:
                 st.subheader("Edit Item")
-                item_id = selected_row[0]["ID"]
                 
                 # Get the selected item details
                 item_details = database.get_item_details(item_id)
@@ -110,3 +109,5 @@ def show_item_management():
                                 st.rerun()
                             else:
                                 st.error(message)
+                else:
+                    st.error(f"No item found with ID {item_id}")

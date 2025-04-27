@@ -21,7 +21,7 @@ def show_inventory_management():
     # Calculate total inventory value
     total_value = (inventory_data['quantity'] * inventory_data['avg_rate']).sum()
     
-    st.metric("Total Inventory Value", f"₹{total_value:,.2f}")
+    st.metric("Total Inventory Value", f"Rs. {total_value:,.2f}")
     
     # Display inventory data
     st.subheader("Current Stock Levels")

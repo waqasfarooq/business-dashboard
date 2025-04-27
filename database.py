@@ -326,9 +326,18 @@ def get_inventory_status():
     """Get current inventory status for all items"""
     conn = get_connection()
     
+    # Query to get inventory data with average rate calculation
     query = """
-    SELECT i.id as item_id, i.name as item_name, i.description, i.unit, 
-           inv.quantity, inv.last_updated
+    SELECT i.id as item_id, i.name as item_name, i.unit, 
+           COALESCE(inv.quantity, 0) as quantity,
+           COALESCE(
+               (SELECT AVG(rate) FROM transactions 
+                WHERE item_id = i.id AND transaction_type = 'incoming'), 0
+           ) as avg_rate,
+           COALESCE(
+               (SELECT AVG(rate) FROM transactions 
+                WHERE item_id = i.id AND transaction_type = 'incoming'), 0
+           ) * COALESCE(inv.quantity, 0) as value
     FROM items i
     LEFT JOIN inventory inv ON i.id = inv.item_id
     ORDER BY i.name
@@ -336,6 +345,13 @@ def get_inventory_status():
     
     inventory_data = pd.read_sql_query(query, conn)
     conn.close()
+    
+    # Ensure we have all required columns, even if empty
+    if 'avg_rate' not in inventory_data.columns:
+        inventory_data['avg_rate'] = 0
+    
+    if 'value' not in inventory_data.columns:
+        inventory_data['value'] = inventory_data['quantity'] * inventory_data['avg_rate']
     
     return inventory_data
 

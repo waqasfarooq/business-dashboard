@@ -22,6 +22,20 @@ def initialize_database():
     )
     ''')
     
+    # Create default admin user if no users exist
+    cursor.execute("SELECT COUNT(*) FROM users")
+    user_count = cursor.fetchone()[0]
+    
+    if user_count == 0:
+        # Create default admin user with password 'admin123'
+        import hashlib
+        default_username = "admin"
+        default_password = hashlib.sha256("admin123".encode()).hexdigest()
+        cursor.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            (default_username, default_password)
+        )
+    
     # Create Parties table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS parties (
@@ -75,17 +89,7 @@ def initialize_database():
     )
     ''')
     
-    # Insert default admin user if none exists
-    cursor.execute("SELECT COUNT(*) FROM users")
-    user_count = cursor.fetchone()[0]
-    
-    if user_count == 0:
-        import hashlib
-        default_password = hashlib.sha256("admin".encode()).hexdigest()
-        cursor.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
-            ("admin", default_password)
-        )
+    # Default admin user is created above
     
     conn.commit()
     conn.close()

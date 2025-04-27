@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 def format_currency(value):
     """Format a value as currency"""
-    return f"₹{value:,.2f}"
+    return f"Rs. {value:,.2f}"
 
 def show_dashboard():
     """Display the dashboard with widgets and charts"""
@@ -52,7 +52,7 @@ def show_dashboard():
         monthly_fig.update_layout(
             title="Monthly Transactions (Last 6 Months)",
             xaxis_title="Month",
-            yaxis_title="Amount (₹)",
+            yaxis_title="Amount (Rs.)",
             barmode='group',
             height=400
         )
@@ -71,7 +71,7 @@ def show_dashboard():
                 x="item_name",
                 y="total_value",
                 title="Top 5 Items by Value",
-                labels={"item_name": "Item", "total_value": "Total Value (₹)"},
+                labels={"item_name": "Item", "total_value": "Total Value (Rs.)"},
                 color_discrete_sequence=['#1f77b4']
             )
             items_fig.update_layout(height=350)
@@ -87,7 +87,7 @@ def show_dashboard():
                 x="party_name",
                 y="total_value",
                 title="Top 5 Parties by Value",
-                labels={"party_name": "Party", "total_value": "Total Value (₹)"},
+                labels={"party_name": "Party", "total_value": "Total Value (Rs.)"},
                 color_discrete_sequence=['#2ca02c']
             )
             parties_fig.update_layout(height=350)

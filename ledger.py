@@ -6,7 +6,7 @@ import database
 
 def format_currency(value):
     """Format a value as currency"""
-    return f"₹{value:,.2f}"
+    return f"Rs. {value:,.2f}"
 
 def display_dataframe(df, height=400):
     """Display a dataframe with formatting using Streamlit's native components"""

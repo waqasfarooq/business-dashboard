@@ -33,7 +33,7 @@ def show_inventory_management():
     display_df.columns = ["ID", "Item", "Unit", "Quantity", "Average Rate", "Value"]
     
     # Format the value column
-    display_df["Value"] = display_df["Value"].apply(lambda x: f"₹{x:,.2f}")
+    display_df["Value"] = display_df["Value"].apply(lambda x: f"Rs. {x:,.2f}")
     
     # Display as interactive table
     st.dataframe(
@@ -42,7 +42,7 @@ def show_inventory_management():
         height=400,
         column_config={
             "Quantity": st.column_config.NumberColumn(format="%.2f"),
-            "Average Rate": st.column_config.NumberColumn(format="₹%.2f")
+            "Average Rate": st.column_config.NumberColumn(format="Rs. %.2f")
         }
     )
     
@@ -65,7 +65,7 @@ def show_inventory_management():
         fig.update_layout(
             xaxis_title="Item",
             yaxis_title="Quantity",
-            coloraxis_colorbar_title="Value (₹)"
+            coloraxis_colorbar_title="Value (Rs.)"
         )
         
         st.plotly_chart(fig, use_container_width=True)

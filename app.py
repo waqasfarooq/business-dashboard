@@ -42,53 +42,127 @@ if 'current_page' not in st.session_state:
 if not st.session_state.logged_in:
     auth.show_login_page()
 else:
-    # Navigation sidebar
+    # Navigation sidebar with improved styling
     with st.sidebar:
         st.title(f"Welcome, {st.session_state.username}")
         
-        st.subheader("Navigation")
+        # Add some space
+        st.write("---")
         
-        selected_page = st.radio(
-            "Select a page",
-            ["Dashboard", "Gatebook Entry", "Ledger", "Party Ledger", 
-             "Item Ledger", "Balance Sheet", "Party Management", 
-             "Item Management", "Inventory Management"],
-            index=["Dashboard", "Gatebook Entry", "Ledger", "Party Ledger", 
-                  "Item Ledger", "Balance Sheet", "Party Management", 
-                  "Item Management", "Inventory Management"].index(st.session_state.current_page)
-        )
+        # Define menu items with icons
+        menu_items = {
+            "Dashboard": "📊",
+            "Gatebook Entry": "📝",
+            "Ledger": "📒",
+            "Party Ledger": "👥",
+            "Item Ledger": "📦",
+            "Balance Sheet": "💰",
+            "Party Management": "🤝",
+            "Item Management": "🏷️",
+            "Inventory Management": "🗃️"
+        }
         
-        st.session_state.current_page = selected_page
+        # Menu section title
+        st.markdown("<h3 style='text-align: center; color: #4169E1;'>Navigation Menu</h3>", unsafe_allow_html=True)
         
-        if st.button("Logout"):
+        # Custom CSS for the menu buttons
+        st.markdown("""
+        <style>
+        div.stButton > button {
+            width: 100%;
+            background-color: #f0f2f6;
+            color: #0e1117;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        div.stButton > button:hover {
+            background-color: #4169E1;
+            color: white;
+            border-color: #4169E1;
+        }
+        div.stButton > button:focus {
+            background-color: #4169E1;
+            color: white;
+            border-color: #4169E1;
+            box-shadow: none;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Current page highlighting style
+        for page, icon in menu_items.items():
+            if page == st.session_state.current_page:
+                button_style = f"""
+                <style>
+                div[data-testid="stButton"] button[kind="secondary"]:nth-of-type({list(menu_items.keys()).index(page) + 1}) {{
+                    background-color: #4169E1;
+                    color: white;
+                    border-color: #4169E1;
+                }}
+                </style>
+                """
+                st.markdown(button_style, unsafe_allow_html=True)
+        
+        # Create a button for each menu item
+        for page, icon in menu_items.items():
+            if st.button(f"{icon} {page}", key=page):
+                st.session_state.current_page = page
+                st.rerun()
+        
+        # Add some space before logout
+        st.write("---")
+        
+        # Styled logout button
+        st.markdown("""
+        <style>
+        div[data-testid="stButton"] button[kind="secondary"]:last-child {
+            background-color: #ff4b4b;
+            color: white;
+            border-color: #ff4b4b;
+            font-weight: bold;
+        }
+        div[data-testid="stButton"] button[kind="secondary"]:last-child:hover {
+            background-color: #ff0000;
+            border-color: #ff0000;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        if st.button("🚪 Logout", key="logout"):
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
     
-    # Main content
-    if selected_page == "Dashboard":
+    # Main content - using session state to determine current page
+    current_page = st.session_state.current_page
+    
+    if current_page == "Dashboard":
         dashboard.show_dashboard()
     
-    elif selected_page == "Gatebook Entry":
+    elif current_page == "Gatebook Entry":
         gatebook.show_gatebook_entry()
     
-    elif selected_page == "Ledger":
+    elif current_page == "Ledger":
         ledger.show_general_ledger()
     
-    elif selected_page == "Party Ledger":
+    elif current_page == "Party Ledger":
         ledger.show_party_ledger()
     
-    elif selected_page == "Item Ledger":
+    elif current_page == "Item Ledger":
         ledger.show_item_ledger()
     
-    elif selected_page == "Balance Sheet":
+    elif current_page == "Balance Sheet":
         balance_sheet.show_balance_sheet()
     
-    elif selected_page == "Party Management":
+    elif current_page == "Party Management":
         party_management.show_party_management()
     
-    elif selected_page == "Item Management":
+    elif current_page == "Item Management":
         item_management.show_item_management()
     
-    elif selected_page == "Inventory Management":
+    elif current_page == "Inventory Management":
         inventory.show_inventory_management()
